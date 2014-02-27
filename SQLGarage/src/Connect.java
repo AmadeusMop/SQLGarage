@@ -110,10 +110,8 @@ public class Connect {
 		//dbTest.displayDbProperties();
 		ResultSet rs = dbTest.query("SELECT * FROM cillian.Garage; SELECT IDENT_CURRENT('cillian.Garage');");
 		if(rs != null) {
-			while() {
-				rs.next();
-			}
-			System.out.println(rs.getInt(0));
+			//rs.absolute(-1);
+			
 			/*ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
 			for(int i = 1; i <= columns; i++) {
@@ -125,6 +123,8 @@ public class Connect {
 					System.out.print(rs.getString(i) + "\t");
 			}
 			md = null;*/
+			
+			System.out.println(rs.getStatement());
 			rs.close();
 			rs = null;
 		}
