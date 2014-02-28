@@ -65,23 +65,20 @@ public class Connect {
 		return new String(new char[n]).replace("\0", s);
 	}
 	
-	private boolean addGasCar(String make, String model, int year, int radius, VehicleType type, int... vehicleArgs) throws SQLException {
+	private boolean addVehicle(String make, String model, int year, int radius, VehicleType type, int... vehicleArgs) throws SQLException {
+		if(!type.verifyArgs(vehicleArgs)) return false;
 		con = this.getConnection();
 		if(con != null) {
-			Statement statement = con.createStatement();
+			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			String garageQuery = INSERT_TEMPLATE;
-			String garageQueryArgs = String.format("%i, '%s', '%s', %i, %i", type.typeID, make, model, year, radius);
+			String garageQueryArgs = String.format("%d, '%s', '%s', %d, %d", type.typeID, make, model, year, radius);
+			String vehicleQuery = type.createInsertQuery("SELECT SCOPE_IDENTITY()", vehicleArgs);
 			garageQuery = String.format(garageQuery, GARAGE_TABLE, GARAGE_PARAMS, garageQueryArgs);
-			statement.addBatch(garageQuery);
-			statement.addBatch("SELECT SCOPE_IDENTITY();");
-			if(statement.executeBatch()[0] >= 1) {
-				ResultSet rs = statement.getResultSet();
-				//statement.addBatch(type.createInsertQuery());
-			} else {
-				throw new IllegalStateException(); //TODO
-			}
+			statement.execute(garageQuery + vehicleQuery);
+			statement.close();
 		}
-		return false;
+		closeConnection();
+		return true;
 	}
 	
 	private ResultSet query(String query) throws SQLException {
@@ -108,47 +105,61 @@ public class Connect {
 	public static void main(String[] args) throws Exception {
 		Connect dbTest = new Connect();
 		//dbTest.displayDbProperties();
-		ResultSet rs = dbTest.query("SELECT * FROM cillian.Garage; SELECT IDENT_CURRENT('cillian.Garage');");
-		if(rs != null) {
-			//rs.absolute(-1);
-			
-			/*ResultSetMetaData md = rs.getMetaData();
-			int columns = md.getColumnCount();
-			for(int i = 1; i <= columns; i++) {
-				System.out.print(md.getColumnName(i) + "\t");
-			}
-			while(rs.next()) {
-				System.out.println();
-				for(int i = 1; i <= columns; i++)
-					System.out.print(rs.getString(i) + "\t");
-			}
-			md = null;*/
-			
-			System.out.println(rs.getStatement());
+		dbTest.addVehicle("Toyota", "Notatoyota", 2002, 187, VehicleType.GAS, 7, 140, 53, 6000);
+		Connection con = dbTest.getConnection();
+		Statement statement = con.createStatement();
+		statement.executeQuery("SELECT 0; SELECT * FROM cillian.Garage INNER JOIN cillian.GasGarage ON Garage.ID = GasGarage.ID;");
+		ResultSet rs;
+		while(statement.getMoreResults()) {
+			rs = statement.getResultSet();
+				printTable(rs);
 			rs.close();
-			rs = null;
+			System.out.println();
+			System.out.println();
 		}
+		rs = null;
 		dbTest.closeConnection();
 	}
 	
+	public static void printTable(ResultSet rs) throws SQLException {
+		ResultSetMetaData md = rs.getMetaData();
+		int columns = md.getColumnCount();
+		for(int i = 1; i <= columns; i++) {
+			System.out.print(md.getColumnName(i) + "\t");
+		}
+		while(rs.next()) {
+			System.out.println();
+			for(int i = 1; i <= columns; i++) {
+				System.out.print(rs.getString(i) + "\t");
+			}
+		}
+		md = null;
+	}
+	
 	private static enum VehicleType {
-		GAS(0, "cillian.GasGarage", "ID, Doors, FuelCapacity, FuelEfficiency, Mileage"),
-		ELECTRIC(1, "cillian.ElectricGarage", "ID, Doors, FuelCapacity, FuelEfficiency, Mileage"),
-		BOAT(2, "cillian.BoatGarage", "ID, Range");
+		GAS(0, "cillian.GasGarage", "ID, Doors, FuelCapacity, FuelEfficiency, Mileage", 4),
+		ELECTRIC(1, "cillian.ElectricGarage", "ID, Doors, FuelCapacity, FuelEfficiency, Mileage", 4),
+		BOAT(2, "cillian.BoatGarage", "ID, Range", 2);
 		
-		VehicleType(int typeID, String table, String params) {
+		VehicleType(int typeID, String table, String params, int argsLength) {
 			this.typeID = typeID;
 			this.params = params;
 			this.table = table;
+			this.argsLength = argsLength;
 		}
 		
 		private final String params;
 		private final String table;
 		private final int typeID;
+		private final int argsLength;
 		
 		public String createInsertQuery(int ID, int... args) {
+			return createInsertQuery(Integer.toString(ID), args);
+		}
+		
+		public String createInsertQuery(String ID, int... args) {
 			String query = INSERT_TEMPLATE;
-			String queryArgs = "%i" + repeatString(", %i", args.length);
+			String queryArgs = "%s" + repeatString(", %d", args.length);
 			queryArgs = queryArgs.substring(0, queryArgs.length() - 2);
 			System.out.println(queryArgs);
 			try {
@@ -156,6 +167,10 @@ public class Connect {
 			} catch(MissingFormatArgumentException e) {
 				throw new IllegalArgumentException(e);
 			}
+		}
+		
+		public boolean verifyArgs(int... args) {
+			return args.length == argsLength;
 		}
 	}
 }
