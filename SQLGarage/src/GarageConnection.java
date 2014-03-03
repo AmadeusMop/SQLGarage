@@ -96,7 +96,7 @@ public class GarageConnection {
 		md = null;
 	}
 	
-	private boolean addVehicle(String make, String model, int year, int radius, VehicleType type, int... vehicleArgs) throws SQLException {
+	protected boolean addVehicle(String make, String model, int year, int radius, VehicleType type, int... vehicleArgs) throws SQLException {
 		if(!type.verifyArgs(vehicleArgs)) return false;
 		con = this.getConnection();
 		if(con != null) {
@@ -113,7 +113,7 @@ public class GarageConnection {
 		return true;
 	}
 	
-	private boolean getVehicleInfo(VehicleType type) throws SQLException {
+	protected boolean getVehicleType(VehicleType type) throws SQLException {
 		con = this.getConnection();
 		if(con != null) {
 			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
