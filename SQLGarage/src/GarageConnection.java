@@ -1,7 +1,7 @@
 import java.sql.*;
 import java.util.MissingFormatArgumentException;
 
-public class Connect {
+public class GarageConnection {
 	private Connection con = null;
 	private final String url = "jdbc:sqlserver://";
 	private final String serverName = "fourwaylo.com";
@@ -16,7 +16,7 @@ public class Connect {
 	private static final String GARAGE_TABLE = "cillian.Garage";
 	private static final String GARAGE_PARAMS = "VehicleType, Make, Model, Year, SteeringWheelRadius";
 	
-	public Connect() {}
+	public GarageConnection() {}
 	
 	private String getConnectionURL() {
 		return String.format("%s%s:%s;databaseName=%s;selectMethod=%s;", url, serverName, portNumber, databaseName, selectMethod);
@@ -125,16 +125,6 @@ public class Connect {
 		return true;
 	}
 	
-	private ResultSet query(String query) throws SQLException {
-		con = this.getConnection();
-		ResultSet rs = null;
-		if(con != null) {
-			Statement statement = con.createStatement();
-			rs = statement.executeQuery(query);
-		}
-		return rs;
-	}
-	
 	private void closeConnection() {
 		try {
 			if(con != null) {
@@ -147,7 +137,7 @@ public class Connect {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Connect dbTest = new Connect();
+		GarageConnection dbTest = new GarageConnection();
 		dbTest.closeConnection();
 	}
 	
@@ -172,10 +162,6 @@ public class Connect {
 			String query = "SELECT * FROM cillian.Garage INNER JOIN %s ON cillian.Garage.ID = %s.ID;";
 			query = String.format(query, table, table);
 			return query;
-		}
-		
-		public String createInsertQuery(int ID, int... args) {
-			return createInsertQuery(Integer.toString(ID), args);
 		}
 		
 		public String createInsertQuery(String ID, int... args) {
