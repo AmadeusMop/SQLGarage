@@ -13,6 +13,7 @@ public class GarageConnection {
 	private final String selectMethod = "cursor";
 	
 	private static final String INSERT_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s);";
+	private static final String REMOVE_TEMPLATE = "REMOVE FROM %s WHERE ID=%d;";
 	private static final String GARAGE_TABLE = "cillian.Garage";
 	private static final String GARAGE_PARAMS = "VehicleType, Make, Model, Year, SteeringWheelRadius";
 	
@@ -106,6 +107,20 @@ public class GarageConnection {
 			String vehicleQuery = type.createInsertQuery("SCOPE_IDENTITY()", vehicleArgs);
 			garageQuery = String.format(garageQuery, GARAGE_TABLE, GARAGE_PARAMS, garageQueryArgs);
 			statement.execute(garageQuery + vehicleQuery);
+			printResults(statement);
+			statement.close();
+		}
+		closeConnection();
+		return true;
+	}
+	
+	protected boolean deleteVehicle(int ID) throws SQLException {
+		con = this.getConnection();
+		if(con != null) {
+			Statement statement = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			String garageQuery = REMOVE_TEMPLATE;
+			garageQuery = String.format(garageQuery, GARAGE_TABLE, ID);
+			statement.execute(garageQuery);
 			printResults(statement);
 			statement.close();
 		}
