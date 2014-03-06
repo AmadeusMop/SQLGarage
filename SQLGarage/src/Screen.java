@@ -84,6 +84,8 @@ public class Screen extends JFrame {
 			C = new GridBagConstraints();
 			C.gridx = 0;
 			C.gridy = 0;
+			C.gridwidth = 1;
+			C.gridheight = 1;
 			C.weightx = 0.5;
 			C.weighty = 0.5;
 			
@@ -94,23 +96,24 @@ public class Screen extends JFrame {
 			modelField.setPreferredSize(new Dimension(100, 20));
 			
 			yearSpinner = new JSpinner(new SpinnerNumberModel(2015, 1900, 2015, 1));
-			
+			yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "####"));
+
 			radiusSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 40, 1));
 			
 			C.gridx = 0;
-			add(new JLabel("Make"), C);
+			add(new JLabel("Year"), C);
 			C.gridx = 1;
+			add(yearSpinner, C);
+			
+			C.gridx = 2;
+			add(new JLabel("Make"), C);
+			C.gridx = 3;
 			add(makeField, C);
 
-			C.gridx = 2;
-			add(new JLabel("Model"), C);
-			C.gridx = 3;
-			add(modelField, C);
-
 			C.gridx = 4;
-			add(new JLabel("Year"), C);
+			add(new JLabel("Model"), C);
 			C.gridx = 5;
-			add(yearSpinner, C);
+			add(modelField, C);
 			
 			C.gridy = 1;
 			C.gridx = 0;
