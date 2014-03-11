@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<style>
+		body {font-size:20px}
+		.bluetext {color:blue}
+		#onetofour {font-size:10px;color:red}
+		#testing {font-size:30px}
+		;
+		</style>
+		<script src="http://code.jquery.com/jquery-1.7.1.min.js">
+			$(document).ready(function() {
+				$("button").click( function() {
+					$(this).hide();
+				});
+			});
+		</script>
+	</head>
+	
+	<body style="background-color:#00ffff">
+		<span id="testing">TESTING</span>
+		<div id="onetofour">
+			<p>
+			ONE <br> TWO
+			<span class="bluetext">THREE</span>
+			</p>
+			<em><strong>FOUR</strong></em>
+		</div>
+		FIVE
+		<br>
+		<span class="bluetext">SIX</span>
+		<small>SEVEN</small>
+		<br>
+		<button id="bigX">X</button>
+		<form id="submitForm" method="post"> <!-- Uses POST because un/pw combos are sensitive data! -->
+			Username: <input type="text" name="un"><br>
+			Password: <input type="password" name="pw"><br>
+			<input type="submit" value="Submit">
+		<form>
+	</body>
+</html>
